@@ -1,25 +1,23 @@
-# DSIC-Net
-Official implement for "DSIC-Net: A Dual-Space Information Cascaded Correction Network for Brain Age Prediction from Structural MRI"
 <div align="center">
-  <h1>🔎 YoloSeg: You Only Label Once for Medical Image Segmentation</h1>
+  <h1>🔎 DSIC-Net: A Dual-Space Information Cascaded Correction Network for Brain Age Prediction from Structural MRI</h1>
 </div>
 
-> Mingen Zhang, Yuanyuan Gu, Meng Wang, Lei Mou, Jingfeng Zhang, Yitian Zhao</br>
+> Tianyu Sun, xxx, xxx, Tong Zhang</br>
 > *Medical Image Analysis (MedIA)*, 2026
 > 
 ---
 
 ## 👀 Overview
 
-YoloSeg is a two-stage framework for medical image segmentation using only **one labeled image**.
+DSIC-Net is a two-stage framework for brain age prediciton using brain T1-weighted Magnetic Resonance Imaging （MRI） scans.
 
-1. **Foundation model-drvien pseudo-label generation**  
-   Generating multi-view pseudo labels and divergence masks from a single labeled image using SAM2.
+1. **Image Space Net**  
+   Stage 1 learns age-sensitive representations directly from the full 3D T1-weighted sMRI volume.
 
-2. **Robust pseudo-label learning for segmentation model**  
-   Training a segmentation network with dual-component loss and cross-patch data augmentation.
+2. **Bounded Graph-Guided Residual Correction Net**  
+   Stage 2 corrected brain age prediciton predicted from stage 1 using brain net information. 
 
-We validated YoloSeg on 10 diverse public datasets, achieving an average Dice only **3.08%** lower than the fully supervised baseline.
+DSIC-Net was validated on 10 diverse public datasets, achieving an average Dice only **3.08%** lower than the fully supervised baseline.
 
 ---
 
@@ -28,8 +26,8 @@ We validated YoloSeg on 10 diverse public datasets, achieving an average Dice on
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/iMED-Lab/YoloSeg.git
-cd YoloSeg
+git clone https://github.com/iMED-Lab/DSIC-Net.git
+cd DSIC-Net
 ```
 
 ### 2. Create environments
@@ -37,8 +35,8 @@ cd YoloSeg
 #### Create a conda environment
 
 ```bash
-conda create -n yoloseg python=3.10 -y
-conda activate yoloseg
+conda create -n DSIC-Net python=3.10 -y
+conda activate DSIC-Net
 ```
 
 #### Install PyTorch
@@ -96,7 +94,7 @@ Notes:
 * Ground-truth labels should be single-channel `.png`
 * Pseudo labels generated in Stage 1 are also single-channel `.png`
 
-We provide a dataset structure example in: `YoloSeg/data/ISIC2016`
+We provide a dataset structure example in: `DSIC-Net/data/ISIC2016`
 
 ---
 
@@ -104,12 +102,12 @@ We provide a dataset structure example in: `YoloSeg/data/ISIC2016`
 
 Please download SAM2 checkpoints from the official repository: [SAM2 Official Repository](https://github.com/facebookresearch/sam2)
 
-Then place the downloaded checkpoint files under: `YoloSeg/code_pl/checkpoints/`
+Then place the downloaded checkpoint files under: `DSIC-Net/code_pl/checkpoints/`
 
 For example:
 
 ```text
-YoloSeg/
+DSIC-Net/
 └── code_pl/
     └── checkpoints/
         ├── sam2.1_hiera_tiny.pt
@@ -122,7 +120,7 @@ We recommend using `sam2.1_hiera_small.pt` by default.
 
 ---
 
-## ⚡ Run YoloSeg
+## ⚡ Run DSIC-Net
 
 #### 1. Stage 1: Multi-view Pseudo-label Generation
 
@@ -159,7 +157,7 @@ Train the segmentation model with the generated pseudo labels:
 ```bash
 python code_seg/train.py \
   --data-root /path/to/DatasetName \
-  --exp-name yoloseg_unet \
+  --exp-name DSIC-Net_unet \
   --num-classes 2 \
   --image-size 256 \
   --batch-size 4 \
@@ -173,8 +171,8 @@ Run testing with the trained model:
 ```bash
 python code_seg/test.py \
   --data-root /path/to/DatasetName \
-  --checkpoint checkpoints/yoloseg_unet/best.pth \
-  --output-dir outputs/yoloseg_unet_test \
+  --checkpoint checkpoints/DSIC-Net_unet/best.pth \
+  --output-dir outputs/DSIC-Net_unet_test \
   --num-classes 2 \
   --image-size 256
 ```
@@ -194,19 +192,14 @@ Their excellent work has greatly inspired and supported this project.
 
 ## 📜 Citation
 
-If you find YoloSeg useful, please cite:
+If you find DSIC-Net useful, please cite:
 
 ```bibtex
-@article{yoloseg2026,
-  title   = {YoloSeg: You Only Label Once for Medical Image Segmentation},
-  author  = {Zhang, Mingen and Gu, Yuanyuan and Wang, Meng and Mou, Lei and Zhang, Jingfeng and Zhao, Yitian},
-  journal = {Medical Image Analysis},
-  year    = {2026}
-}
+xxxxxxxxxxxxxxxxxxx
 ```
 
 ---
 
 ## 🧠 Questions
 
-If you have any questions, feel free to contact: zhangmingen@nimte.ac.cn
+If you have any questions, feel free to contact: aaaaa@nxxxx
