@@ -2,7 +2,7 @@
   <h1>🔎 DSIC-Net: A Dual-Space Information Cascaded Correction Network for Brain Age Prediction from Structural MRI</h1>
 </div>
 
-> Tianyu Sun, xxx, xxx, Tong Zhang</br>
+> Tianyu Sun, Xinyao Zhao, Zhaoqin Huang, Ximing Wang, Cui-Na Jiao, Zehua Zhang, Ning Zhao, Hao Zhou, Junhao Nie, Xuan Wang, Qiang Zheng, Tong Zhang</br>
 > *Medical Image Analysis (MedIA)*, 2026
 > 
 ---
@@ -21,185 +21,163 @@ DSIC-Net was validated on 10 diverse public datasets, achieving an average Dice 
 
 ---
 
-## 🚀 Quick Start
+## Repository layout
 
-### 1. Clone the repository
+~~~text
+.
+├── src/dsic_net/
+│   ├── models/
+│   │   ├── image_space_net.py
+│   │   ├── graph_correction_net.py
+│   │   └── dsic_net.py
+│   ├── data.py
+│   ├── demo_data.py
+│   └── training.py
+├── scripts/
+│   ├── make_demo_data.py
+│   ├── validate_data.py
+│   ├── run_demo.py
+│   ├── train_stage1.py
+│   ├── train_stage2.py
+│   └── predict.py
+├── data/demo/
+├── tests/
+├── .github/workflows/ci.yml
+└── pyproject.toml
+~~~
 
-```bash
-git clone https://github.com/iMED-Lab/DSIC-Net.git
-cd DSIC-Net
-```
+## Installation
 
-### 2. Create environments
+Python 3.10 or newer is required. A GPU is optional for the demo but recommended for
+full-resolution training.
 
-#### Create a conda environment
+~~~bash
+python -m venv .venv
+source .venv/bin/activate              # Windows: .venv\Scripts\activate
+python -m pip install --upgrade pip
 
-```bash
-conda create -n DSIC-Net python=3.10 -y
-conda activate DSIC-Net
-```
+# CPU-only PyTorch:
+python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -e ".[dev]"
+~~~
 
-#### Install PyTorch
+For CUDA, install the PyTorch build appropriate for the local driver first, then run
+the editable-install command.
 
-```bash
-pip install torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu118
-```
+## Run the verified example
 
-#### Install SAM2 and other dependencies
+The repository already contains six deterministic synthetic subjects (4 train, 1 val,
+1 test). Recreate them, validate every NIfTI/NPZ file, and run one end-to-end forward
+pass:
 
-```bash
-pip install -e ./code_pl
-pip install -r requirements.txt
-```
+~~~bash
+python scripts/make_demo_data.py --overwrite
+python scripts/validate_data.py --manifest data/demo/manifest.csv
+python scripts/run_demo.py --manifest data/demo/manifest.csv --device cpu
+~~~
 
----
+The prediction is written to outputs/demo_predictions.csv. Because the demo uses
+randomly initialized weights, the predicted ages are not meaningful. The command is
+successful when it reports status=ok and correction_bound_satisfied=true.
 
-## 📂 Dataset Preparation
+## Train the two stages
 
-Please organize the dataset as follows:
+The following commands are deliberately small enough for a software smoke test:
 
-```text
-DatasetName/
-├── file_list/
-│   ├── train_all_frames.txt
-│   ├── train_label_frames.txt
-│   └── test_all_frames.txt
-├── Train/
-│   ├── JPEGImages/
-│   │   ├── XXX001.png
-│   │   ├── XXX002.png
-│   │   └── ...
-│   └── Annotations/
-│       ├── XXX001.png
-│       ├── XXX002.png
-│       └── ...
-└── Test/
-    ├── JPEGImages/
-    │   ├── XXX101.png
-    │   ├── XXX102.png
-    │   └── ...
-    └── Annotations/
-        ├── XXX101.png
-        ├── XXX102.png
-        └── ...
-```
+~~~bash
+python scripts/train_stage1.py \
+  --manifest data/demo/manifest.csv \
+  --epochs 1 \
+  --device cpu \
+  --output outputs/stage1.pt
 
-Notes:
+python scripts/train_stage2.py \
+  --manifest data/demo/manifest.csv \
+  --stage1-checkpoint outputs/stage1.pt \
+  --epochs 1 \
+  --device cpu \
+  --output outputs/dsic_net.pt
 
-* `train_all_frames.txt`: all training image filenames
-* `train_label_frames.txt`: the selected labeled image filename for the one-shot setting
-* `test_all_frames.txt`: all test image filenames
-* Filenames in `file_list/*.txt` should be plain filenames, for example: `XXX001.png`
-* Input images should be 3-channel `.png`
-* Ground-truth labels should be single-channel `.png`
-* Pseudo labels generated in Stage 1 are also single-channel `.png`
+python scripts/predict.py \
+  --manifest data/demo/manifest.csv \
+  --checkpoint outputs/dsic_net.pt \
+  --split test \
+  --device cpu \
+  --output outputs/predictions.csv
+~~~
 
-We provide a dataset structure example in: `DSIC-Net/data/ISIC2016`
+For real experiments, increase the input resolution, channel widths, epochs, and batch
+size according to available memory. Stage 1 is frozen during the provided Stage-2
+training routine so its output remains an explicit anchor, matching the cascaded
+prediction-and-correction design.
 
----
+## Data format
 
-## 🤖 Model Preparation
+Use a UTF-8 CSV file with one row per subject:
 
-Please download SAM2 checkpoints from the official repository: [SAM2 Official Repository](https://github.com/facebookresearch/sam2)
+| Column     | Meaning                                                      |
+| ---------- | ------------------------------------------------------------ |
+| subject_id | Unique subject identifier; duplicates across splits are rejected |
+| image_path | Path to a preprocessed 3D NIfTI image, relative to the manifest |
+| graph_path | Path to an NPZ R2SN file, relative to the manifest           |
+| age        | Chronological age in years                                   |
+| sex        | Binary metadata field (0 or 1); retained for cohort auditing |
+| split      | train, val, or test                                          |
 
-Then place the downloaded checkpoint files under: `DSIC-Net/code_pl/checkpoints/`
+Each graph NPZ must contain:
 
-For example:
+- node_features: float array with shape (N, d), one radiomics descriptor per ROI;
+- adjacency: symmetric float array with shape (N, N).
 
-```text
-DSIC-Net/
-└── code_pl/
-    └── checkpoints/
-        ├── sam2.1_hiera_tiny.pt
-        ├── sam2.1_hiera_small.pt
-        ├── sam2.1_hiera_base_plus.pt
-        └── sam2.1_hiera_large.pt
-```
+All subjects must use the same N and d. Self-loops are added inside the model, so the
+stored adjacency may have a zero diagonal. The loader z-scores nonzero voxels and
+resamples each volume to the requested image_size. For paper experiments, keep the
+same preprocessing, atlas, radiomics extraction, R2SN construction, and target size
+across all cohorts.
 
-We recommend using `sam2.1_hiera_small.pt` by default.
+Validate a real manifest before training:
 
----
+~~~bash
+python scripts/validate_data.py --manifest /path/to/manifest.csv
+~~~
 
-## ⚡ Run DSIC-Net
+The validator checks required columns, labels, split leakage, readable 3D NIfTI
+volumes, finite values, graph dimensions, and adjacency symmetry.
 
-#### 1. Stage 1: Multi-view Pseudo-label Generation
+## Tests and quality checks
 
-Run Stage 1 to generate:
+~~~bash
+pytest
+ruff check .
+python -m compileall -q src scripts tests
+~~~
 
-* `pl_original`
-* `pl_rotate`
-* `pl_flip`
-* `divergence_mask`
+Tests cover tensor shapes, gradients, normalized adjacency, Methods Eq. (12), the
+strict graph-correction bound, and the complete data loader.
 
-```bash
-python code_pl/multi_view_inference.py \
-  --data-root /path/to/DatasetName \
-  --checkpoint code_pl/checkpoints/sam2.1_hiera_small.pt \
-  --cfg code_pl/configs/sam2.1/sam2.1_hiera_s.yaml
-```
+## Reproducibility notes
 
-After Stage 1, the `Train/` directory will be automatically updated as:
+- The source archive's six NIfTI files were truncated and could not be decompressed.
+  They were replaced in this clean repository by generated, valid synthetic images.
+- The legacy XLS/XLSX cohort tables used abbreviated columns and included rows for
+  data not present in the archive. The runnable example therefore uses an explicit,
+  portable CSV manifest.
+- The supplied Methods excerpt refers to R2SN construction in Section 2.2.2, which
+  was not included. This repository consumes precomputed R2SN node features and
+  adjacency matrices; it does not invent a paper preprocessing pipeline.
+- The training loss and optimizer are practical defaults because the supplied excerpt
+  specifies the architecture but not the optimization protocol. Replace these values
+  with the final manuscript settings before reporting results.
+- No pretrained weights or original study images are distributed.
 
-```text
-Train/
-├── JPEGImages/
-├── Annotations/
-├── pl_original/
-├── pl_rotate/
-├── pl_flip/
-└── divergence_mask/
-```
+## Citation and license
 
-#### 2. Stage 2: Segmentation Training
-
-Train the segmentation model with the generated pseudo labels:
-
-```bash
-python code_seg/train.py \
-  --data-root /path/to/DatasetName \
-  --exp-name DSIC-Net_unet \
-  --num-classes 2 \
-  --image-size 256 \
-  --batch-size 4 \
-  --epochs 100
-```
-
-#### 3. Testing
-
-Run testing with the trained model:
-
-```bash
-python code_seg/test.py \
-  --data-root /path/to/DatasetName \
-  --checkpoint checkpoints/DSIC-Net_unet/best.pth \
-  --output-dir outputs/DSIC-Net_unet_test \
-  --num-classes 2 \
-  --image-size 256
-```
-
----
-
-## 🙏 Acknowledgements
-
-We would like to thank the authors of the following open-source projects:
-
-- [SAM2](https://github.com/facebookresearch/sam2)
-- [SSL4MIS](https://github.com/HiLab-git/SSL4MIS)
-
-Their excellent work has greatly inspired and supported this project.
+Add the manuscript citation, authors, DOI, and a CITATION.cff file once the paper
+metadata are final. No open-source license was supplied with the input material; see
+LICENSE-NOTICE.md before publishing.
 
 ---
 
-## 📜 Citation
-
-If you find DSIC-Net useful, please cite:
-
-```bibtex
-xxxxxxxxxxxxxxxxxxx
-```
-
----
-
-## 🧠 Questions
+## Questions
 
 If you have any questions, feel free to contact: aaaaa@nxxxx
