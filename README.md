@@ -6,7 +6,7 @@
 > *Medical Image Analysis (MedIA)*, 2026
 > 
 ---
-![Graph Abstract](./figure/GraphAbstracts.pdf)
+![Graph Abstract](./figure/GraphAbstracts.svg)
 ## 👀 Overview
 
 DSIC-Net is a two-stage framework for brain age prediciton using brain T1-weighted Magnetic Resonance Imaging （MRI） scans.
