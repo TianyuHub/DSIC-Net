@@ -158,9 +158,7 @@ strict graph-correction bound, and the complete data loader.
 
 ## 📝 Citation and license
 
-Add the manuscript citation, authors, DOI, and a CITATION.cff file once the paper
-metadata are final. No open-source license was supplied with the input material; see
-LICENSE-NOTICE.md before publishing.
+References will be disclosed upon publication.
 
 ---
 
