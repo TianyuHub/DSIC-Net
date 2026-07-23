@@ -1,0 +1,7 @@
+subject_id,image_path,graph_path,age,sex,split
+demo_001,images/demo_001.nii.gz,graphs/demo_001.npz,29.0,0,train
+demo_002,images/demo_002.nii.gz,graphs/demo_002.npz,34.0,1,train
+demo_003,images/demo_003.nii.gz,graphs/demo_003.npz,39.0,0,train
+demo_004,images/demo_004.nii.gz,graphs/demo_004.npz,47.0,1,train
+demo_005,images/demo_005.nii.gz,graphs/demo_005.npz,55.0,1,val
+demo_006,images/demo_006.nii.gz,graphs/demo_006.npz,36.0,0,test
