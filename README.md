@@ -21,7 +21,7 @@ DSIC-Net was validated on 10 diverse public datasets, achieving an average Dice 
 
 ---
 
-## Repository layout
+## 📂 Repository layout
 
 ~~~text
 .
@@ -46,7 +46,7 @@ DSIC-Net was validated on 10 diverse public datasets, achieving an average Dice 
 └── pyproject.toml
 ~~~
 
-## Installation
+## ⚙️ Installation
 
 Python 3.10 or newer is required. A GPU is optional for the demo but recommended for
 full-resolution training.
@@ -64,7 +64,7 @@ python -m pip install -e ".[dev]"
 For CUDA, install the PyTorch build appropriate for the local driver first, then run
 the editable-install command.
 
-## Run the verified example
+## 🚀 Run the verified example
 
 The repository already contains six deterministic synthetic subjects (4 train, 1 val,
 1 test). Recreate them, validate every NIfTI/NPZ file, and run one end-to-end forward
@@ -80,7 +80,7 @@ The prediction is written to outputs/demo_predictions.csv. Because the demo uses
 randomly initialized weights, the predicted ages are not meaningful. The command is
 successful when it reports status=ok and correction_bound_satisfied=true.
 
-## Train the two stages
+## 🏋️ Train the two stages
 
 The following commands are deliberately small enough for a software smoke test:
 
@@ -111,7 +111,7 @@ size according to available memory. Stage 1 is frozen during the provided Stage-
 training routine so its output remains an explicit anchor, matching the cascaded
 prediction-and-correction design.
 
-## Data format
+## ✨ Data format
 
 Use a UTF-8 CSV file with one row per subject:
 
@@ -144,7 +144,7 @@ python scripts/validate_data.py --manifest /path/to/manifest.csv
 The validator checks required columns, labels, split leakage, readable 3D NIfTI
 volumes, finite values, graph dimensions, and adjacency symmetry.
 
-## Tests and quality checks
+## 📊 Tests and quality checks
 
 ~~~bash
 pytest
@@ -155,22 +155,8 @@ python -m compileall -q src scripts tests
 Tests cover tensor shapes, gradients, normalized adjacency, Methods Eq. (12), the
 strict graph-correction bound, and the complete data loader.
 
-## Reproducibility notes
 
-- The source archive's six NIfTI files were truncated and could not be decompressed.
-  They were replaced in this clean repository by generated, valid synthetic images.
-- The legacy XLS/XLSX cohort tables used abbreviated columns and included rows for
-  data not present in the archive. The runnable example therefore uses an explicit,
-  portable CSV manifest.
-- The supplied Methods excerpt refers to R2SN construction in Section 2.2.2, which
-  was not included. This repository consumes precomputed R2SN node features and
-  adjacency matrices; it does not invent a paper preprocessing pipeline.
-- The training loss and optimizer are practical defaults because the supplied excerpt
-  specifies the architecture but not the optimization protocol. Replace these values
-  with the final manuscript settings before reporting results.
-- No pretrained weights or original study images are distributed.
-
-## Citation and license
+## 📝 Citation and license
 
 Add the manuscript citation, authors, DOI, and a CITATION.cff file once the paper
 metadata are final. No open-source license was supplied with the input material; see
@@ -178,6 +164,6 @@ LICENSE-NOTICE.md before publishing.
 
 ---
 
-## Questions
+## 📬 Questions
 
 If you have any questions, feel free to contact: aaaaa@nxxxx
