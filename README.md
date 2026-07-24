@@ -162,6 +162,3 @@ References will be disclosed upon publication.
 
 ---
 
-## 📬 Questions
-
-If you have any questions, feel free to contact: aaaaa@nxxxx
